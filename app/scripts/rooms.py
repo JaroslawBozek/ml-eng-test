@@ -15,14 +15,6 @@ class Rooms():
         elif temp_file_path.endswith('.png') or temp_file_path.endswith('.jpg'):
             self.im = cv2.imread(temp_file_path, 0)
             
-            
-        self.im_x, self.im_y = self.im.shape
-        self.im2 = np.zeros((self.im_x, self.im_y), np.uint8)
-        self.im2.fill(255)
-        
-    def imshow(self):
-        im3 = cv2.resize(self.im, (0,0), fx=0.25, fy=0.25)
-        cv2.imshow('im3', im3)
 
     def prepare_json(self):
     
@@ -57,9 +49,8 @@ class Rooms():
         return data_out
     def detect_rooms(self):
         
-        
-        
         data_out = self.prepare_json()
+        
         return data_out
     
 def main(temp_file_path):

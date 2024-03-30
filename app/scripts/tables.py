@@ -57,6 +57,7 @@ class Table():
             #check if the contour is quadrangular (usually table or cell)            
             if len(child_vertices) == 4 and len(parent_vertices) == 4:
                 if areas[area] <= areas[parent_id] * 0.5:
+                    #parents receive points depending how close their children are to them and how big they are
                     c_x,c_y,c_w,c_h = cv2.boundingRect(contours[area])
                     p_x,p_y,p_w,p_h = cv2.boundingRect(contours[parent_id])
                     distances = [abs(c_x-p_x), abs(c_y-p_y), abs(c_x+c_w-p_x-p_w), abs(c_y+c_h-p_y-p_h)]
@@ -73,12 +74,13 @@ class Table():
         
     def get_tables_corners(self, contours, scores):
     
-        #separate low scores from high scores (tables)
         best_i = 0
         best_quotient = 1
         last_score = -1
         scores = dict(sorted(scores.items(), key=lambda item: item[1], reverse=True))
+        #contours with high scores(tables) get separated from these with low scores
         for i, score in enumerate(scores):
+        
             if scores[score] <= 1:
                 break
                 
@@ -90,7 +92,7 @@ class Table():
                 
             last_score = scores[score]
     
-        #get tables corners
+        #get tables' corners
         for score_id, score in list(scores.items())[:best_i]:
         
             x,y,w,h = cv2.boundingRect(contours[score_id])
@@ -133,22 +135,19 @@ class Table():
     def merge_tables(self, extracted_tables):
     
         tableFeatures = {}
-        contour_error = 3 #in case where contours are not aligning perfectly (error in pixels)
         
-        #table contours get sorted in order to be read from top->bottom and left->right
+        #Table contours get sorted in order to be read from top->bottom and left->right
         sorted_corners = dict(sorted(self.tables_corners.items(), key=lambda item: (item[1][0], item[1][1], item[1][2], item[1][3])))
         
         data_merged = []
         tableName = 'placeholder'
         data = []
         
-        #data from previous row 
+        #data from previous row
         last_col_count = 0
         last_cell_borders = [1]
         
-        #flag that determines if current row counts as header
         is_header = True
-        #flag that determines if current row is a tableName
         is_tableName = True
         
         #extracted data
@@ -206,6 +205,7 @@ class Table():
                     l_cell = last_cell_borders[0]
                     r_cell = last_cell_borders[1]
                     
+                    #The header and data cells can be offset from each other, so the cells that overlap the largest part are assigned to each other
                     for i in range(len(last_cell_borders)-1):
                         
                         if last_cell_borders[i+1] != r_cell:
@@ -248,6 +248,7 @@ class Table():
 
     def prepare_json(self, data_merged):
         
+        #Data is unpacked and sorted because img2table reads the table by rows instead of columns
         detection_results = []
         for table in data_merged:
             tableName = table[0]

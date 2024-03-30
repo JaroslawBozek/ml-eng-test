@@ -27,7 +27,6 @@ def run_inference():
         
         data_out = rooms.main(temp_file_path)
         
-        print("processing:", image_file.filename)
         return jsonify(data_out), 200
     
     elif inference_type == 'tables':
@@ -43,7 +42,6 @@ def run_inference():
         
         data_out = tables.main(temp_file_path)
 
-        print("processing:", image_file.filename)
         return jsonify(data_out), 200
     
     else:
